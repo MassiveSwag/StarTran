@@ -34,6 +34,7 @@
         #overlay p {
 			all: unset;
 			font-size: 18px;
+			padding-bottom: 8px;
 		}
 		#overlay h1 {
 			all: unset;
