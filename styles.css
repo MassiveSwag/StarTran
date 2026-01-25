@@ -42,9 +42,11 @@
             pointer-events: auto;
         }
         #overlay p {
-			font-size: 16x;
+			all: unset;
+			font-size: 16px;
 		}
         #overlay h1 {
+			all: unset;
 			font-size: 30px;
 		}
         .ticket-container {
