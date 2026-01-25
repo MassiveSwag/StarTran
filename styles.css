@@ -19,7 +19,7 @@
         }
         #overlay {
            all: unset;
-		   font-size to: 0.8em;
+		   font-size: 0.8em;
 		   position: fixed;
            inset: 0;
            background: #111;
@@ -34,6 +34,10 @@
         #overlay p {
 			all: unset;
 			font-size: 0.5em;
+		}
+		#overlay h1 {
+			margin: 2px;
+		}
         #content {
            display: none;
         }
