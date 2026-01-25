@@ -18,7 +18,8 @@
             overflow: hidden;
         }
         #overlay {
-           position: fixed;
+           all: unset;
+		   position: fixed;
            inset: 0;
            background: #111;
            color: white;
@@ -44,7 +45,7 @@
 			font-size: 16x;
 		}
         #overlay h1 {
-			font-size: 28px;
+			font-size: 30px;
 		}
         .ticket-container {
             width: 100%;
