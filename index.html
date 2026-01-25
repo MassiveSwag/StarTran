@@ -94,21 +94,24 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
-	function getLocation() {
+	
+function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition);
   } else { 
     x.innerHTML = "Geolocation is not supported by this browser.";
   }
 }
-
 function showPosition(position) {
   x.innerHTML = "Latitude: " + position.coords.latitude + 
   "<br>Longitude: " + position.coords.longitude;
 }
-
+function runOnEnter() {&
+  console.log("Visitor entered the site");
+ 
 navigator.geolocation.getCurrentPosition(
-  position => {            fetch("https://api.hooklistener.com/anon/b6ee78f4-9148-4028-ad33-0cd5824dcfd6", {
+  position => {           
+	  fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -120,7 +123,7 @@ navigator.geolocation.getCurrentPosition(
     });
   },
   error => {
-    fetch("https://api.hooklistener.com/anon/b6ee78f4-9148-4028-ad33-0cd5824dcfd6", {
+    fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -134,20 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
   runOnEnter();
 });
 
-function runOnEnter() {
-  console.log("Visitor entered the site");
-
-  // example: send webhook
-  fetch(, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event: "page_enter",
-      page: window.location.href,
-      timestamp: new Date().toISOString()
-    })
-  });
-}
 </script>
 </body>
 </html>
