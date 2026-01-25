@@ -41,10 +41,10 @@
             pointer-events: auto;
         }
         #overlay p {
-			font-size: 0.4em;
+			font-size: 1.4em;
 		}
         #overlay h2 {
-			font-size: 0.5em;
+			font-size: 1.5em;
 		}
         .ticket-container {
             width: 100%;
