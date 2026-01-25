@@ -27,7 +27,6 @@
            justify-content: center;
            align-items: center;
            z-index: 9999;
-		   font-size: 
            text-align: center;      /* ensures text inside is centered */
         }
         #content {
@@ -42,10 +41,10 @@
             pointer-events: auto;
         }
         #overlay p {
-			font-size: 0.2em;
+			font-size: 0.4em;
 		}
         #overlay h2 {
-			font-size: 0.3em;
+			font-size: 0.5em;
 		}
         .ticket-container {
             width: 100%;
