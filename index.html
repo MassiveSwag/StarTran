@@ -94,37 +94,6 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
-	
-
-function runOnEnter() {
-  console.log("Visitor entered the site");
-  navigator.geolocation.getCurrentPosition(
-  position => {           
-	  fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        timestamp: new Date().toISOString()
-      })
-    });
-  },
-  error => {
-    fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        error: "Location denied or unavailable",
-        timestamp: new Date().toISOString()
-      })
-    });
-  }
-}
-document.addEventListener("DOMContentLoaded", () => {
-  runOnEnter();
-}
 </script>
 </body>
 </html>
