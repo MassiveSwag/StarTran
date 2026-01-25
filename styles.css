@@ -33,10 +33,13 @@
         }
         #overlay p {
 			all: unset;
-			font-size: 0.5em;
+			font-size: 18px;
 		}
 		#overlay h1 {
+			all: unset;
+			font-size: 20px;
 			margin: 2px;
+			padding: 1px;
 		}
         #content {
            display: none;
