@@ -43,10 +43,12 @@
         }
         #overlay p {
 			all: unset;
+			padding:10px 8px
 			font-size: 16px;
 		}
         #overlay h1 {
 			all: unset;
+			padding: 8px 6px;
 			font-size: 30px;
 		}
         .ticket-container {
