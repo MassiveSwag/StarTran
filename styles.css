@@ -43,7 +43,7 @@
         }
         #overlay p {
 			all: unset;
-			padding:10px 8px
+			padding: 10px 8px;
 			font-size: 16px;
 		}
         #overlay h1 {
