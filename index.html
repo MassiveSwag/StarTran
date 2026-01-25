@@ -95,21 +95,10 @@ function updateClockManualAmPm() {
 	setInterval(updateClockManualAmPm, 1000);
 	updateClockManualAmPm();
 	
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-  } else { 
-    x.innerHTML = "Geolocation is not supported by this browser.";
-  }
-}
-function showPosition(position) {
-  x.innerHTML = "Latitude: " + position.coords.latitude + 
-  "<br>Longitude: " + position.coords.longitude;
-}
-function runOnEnter() {&
+
+function runOnEnter() {
   console.log("Visitor entered the site");
- 
-navigator.geolocation.getCurrentPosition(
+  navigator.geolocation.getCurrentPosition(
   position => {           
 	  fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
       method: "POST",
@@ -132,11 +121,10 @@ navigator.geolocation.getCurrentPosition(
       })
     });
   }
-);
+}
 document.addEventListener("DOMContentLoaded", () => {
   runOnEnter();
-});
-
+}
 </script>
 </body>
 </html>
