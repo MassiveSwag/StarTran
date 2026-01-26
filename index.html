@@ -112,9 +112,6 @@ function getCentralTimeISO() {
   }).format(new Date());
 }
 
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
-
 	
 	 document.addEventListener("DOMContentLoaded", () => {
      console.log("DOM loaded");
@@ -140,7 +137,10 @@ function getCentralTimeISO() {
         content.style.display = "block";
 
         // Send webhook
-        fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
+		  const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+        
+		fetch("https://app.hooklistener.com/w/my-first-endpoint-opbl", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
