@@ -2,7 +2,7 @@ Version 1.1.127
 
 Created for free entrance onto Lincoln StarTran bus systems. Steps are below for this to work properly. 
 
-1. Visit https://massiveswag.github.io/startran/
+1. Visit [[http(https://massiveswag.github.io/StarTran/)](https://massiveswag.github.io/StarTran/)
 2. Save the site to your home screen as a webapp. 
 3. Once saved you can use the app instead of the web address.
 4. Have the brightness on your phone to 100%
