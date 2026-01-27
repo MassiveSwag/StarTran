@@ -1,2 +1,11 @@
-This is a mockup of the passes StarTran uses to ride the bus. They aren't scan just glanced at for authenticity. As long as they look identical they pass.
-This is my attempt to show a simple html doc could pass as an actual boarding pass.
+Version 1.1.127
+
+Created for free entrance onto Lincoln StarTran bus systems. Steps are below for this to work properly. 
+
+1. Visit https://massiveswag.github.io/startran
+2. Save the site to your home screen as a webapp. 
+3. Once saved you can use the app instead of the web address.
+4. Have the brightness on your phone to 100%
+
+Currently this is only for iPhones. and not Android devices. If I get a screen shit or an example of the Android version I may create a version for them. 
+
