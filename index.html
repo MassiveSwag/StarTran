@@ -164,28 +164,6 @@ function getCentralTimeISO() {
     );
   });
 });
-    var idleTimeout; // variable to hold the timeout
-
-    function resetTimer() {
-        clearTimeout(idleTimeout); // Clear the existing timeout
-        // Set a new idle timeout (e.g., 3 minutes = 180000 milliseconds)
-        idleTimeout = setTimeout(doSomething, 180000); 
-    }
-
-    function doSomething() {
-        // Action to perform when idle (e.g., refresh the page)
-        window.location.reload(); 
-        // Or redirect to another page: window.location.href = 'logout.html';
-    }
-
-    // Bind events to reset the timer
-    var events = ['click', 'touchstart', 'mousemove', 'scroll', 'keydown', 'mousedown', 'touchmove'];
-    events.forEach(function(event) {
-        document.addEventListener(event, resetTimer, false);
-    });
-
-    // Initialize the timer on page load
-    resetTimer(); 
 </script>
 </body>
 </html>
