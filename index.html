@@ -165,6 +165,13 @@ function getCentralTimeISO() {
     );
   });
 });
+@WebServlet("/platform")
+public class PlatformServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String platform = request.getHeader("Sec-CH-UA-Platform");
+        response.getWriter().write("Platform: " + platform);
+    }
+}
 </script>
 </body>
 </html>
