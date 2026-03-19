@@ -49,13 +49,7 @@
 	</div>
 </div>
 <script>
-	@WebServlet("/platform")
-public class PlatformServlet extends HttpServlet {
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String platform = request.getHeader("Sec-CH-UA-Platform");
-        response.getWriter().write("Platform: " + platform);
-    }
-};
+
 		// Get the current date and time
         const today = new Date();
         
