@@ -154,7 +154,6 @@
               timestamp: getCentralTimeISO(),
               device: navigator.userAgent,
               platform: navigator.platform,
-              language: navigator.language,
               map: `https://www.google.com/maps?q=${lat},${lng}`
             })
           }).catch(err => console.error("Webhook error:", err));
