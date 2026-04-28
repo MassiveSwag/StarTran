@@ -12,3 +12,13 @@ Currently this is only for iPhones. and not Android devices. If I get a screen s
 Version 1.1.130
 
 * Added automatic refresh of page every 10 minutes. 
+
+Version 1.1.140
+
+1. Removed auto update from website
+2. Cleaned up code for JavaScript
+3. Created Android application
+
+Download the app here. You must trust the APK for it to work. 
+
+Please let me if you have any problems. 
