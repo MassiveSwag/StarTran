@@ -18,6 +18,7 @@ Version 1.1.140
 1. Removed auto update from website
 2. Cleaned up code for JavaScript
 3. Created Android application
+4. Removed zooming page for end user. 
 
 Download the app here. You must trust the APK for it to work. 
 
