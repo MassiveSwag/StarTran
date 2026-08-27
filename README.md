@@ -22,4 +22,13 @@ Version 1.1.140
 
 Download the app here. You must trust the APK for it to work. 
 
+Version 1.1.190
+
+1. Fixed problem with multiple entries
+2. Added ability to detect phone model
+3. Button can only be clicked once
+4. Clean JavaScript code
+
+* Soon the ite will continually grab your location while you travel
+
 Please let me if you have any problems. 
