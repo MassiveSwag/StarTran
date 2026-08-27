@@ -28,6 +28,7 @@ Version 1.1.190
 2. Added ability to detect phone model
 3. Button can only be clicked once
 4. Clean JavaScript code
+5. Pressing the "X" button reloads the page
 
 * Soon the ite will continually grab your location while you travel
 
