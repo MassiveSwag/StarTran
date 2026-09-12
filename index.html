@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>TokenTransit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="icon" type="image/x-icon" href="img/bigTokenFavicon.ico">
+<link rel="apple-touch-icon" href="img/bigTokenFavicon.png">
+<style>
+ body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  background:#ededf1;
+ }
+iframe {
+  height: 100vh;
+  width: 100vw;
+  border: none;
+}
+
+</style>
+</head>
+<body>
+
+<iframe id="contentFrame"></iframe>
+<script>
+function loadPage(page) {
+
+    const frame = document.getElementById("contentFrame");
+
+    frame.classList.add("slideOut");
+
+    setTimeout(() => {
+
+        frame.src = page;
+
+        frame.onload = function() {
+
+            // Start the new page at the bottom
+            frame.contentWindow.scrollTo(0, frame.contentDocument.body.scrollHeight);
+
+            frame.classList.remove("slideOut");
+
+            // Slowly scroll from bottom to top
+            setTimeout(() => {
+
+                frame.contentWindow.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "smooth"
+                });
+
+            }, 100);
+
+        };
+
+    }, 300);
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const frame = document.getElementById('contentFrame');
+
+    frame.src = 'Pass/index.html';
+
+});
+</script>
+</body>
+</html>
