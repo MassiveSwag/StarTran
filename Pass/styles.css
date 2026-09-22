@@ -18,27 +18,6 @@ body{
     flex-direction:column;
 }
 
-#flashMessage {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    
-    background: black;
-    color: white;
-    padding: 15px 25px;
-    border: 2px solid white;
-    border-radius: 8px;
-    
-    font-family: Arial, sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-    
-    z-index: 9999;
-    
-    display: none;
-}
-
 /* ---------- Layout ---------- */
 
 .container{
