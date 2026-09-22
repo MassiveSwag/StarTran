@@ -1,5 +1,5 @@
-<DOCTYPE html>
-<html
+<!DOCTYPE html>
+<html>
 <head>
 <script>
 'use strict';
@@ -208,11 +208,48 @@ let update = () =>
     }
 }
 
-// mouse controls
-onmousemove = e => mouseX = e.x;
-onmousedown = e => mouseDown = .1;
-onmouseup   = e => mouseDown = 0;
+// Mouse / Touch / Pen controls
+a.style.touchAction = 'none';
 
+onpointermove = e =>
+{
+    mouseX = e.clientX;
+};
+
+onpointerdown = e =>
+{
+    e.preventDefault();
+
+    mouseX = e.clientX;
+    mouseDown = .1;
+    mouseJustPressed = 1;
+    mouseMode = 1;
+
+    // Keep receiving pointer events even if the finger
+    // moves slightly outside the canvas.
+    if (a.setPointerCapture)
+    {
+        try {
+            a.setPointerCapture(e.pointerId);
+        }
+        catch {}
+    }
+};
+
+onpointerup = e =>
+{
+    e.preventDefault();
+    mouseDown = 0;
+
+    if (a.releasePointerCapture)
+    {
+        try {
+            a.releasePointerCapture(e.pointerId);
+        }
+        catch {}
+    }
+};
+    
 if (!ENHANCED)
     setInterval(update, 16); // 60 fps update
 else
@@ -286,30 +323,7 @@ else
         a.width = innerWidth;
         a.height = innerHeight;
     }
-
-    // touch support
-    if (window.ontouchstart !== undefined)
-    {
-        // disable mobile text selection, long-press callout/magnifier, and touch gestures
-        for (const el of [document.documentElement, document.body, a])
-        {
-            el.style.userSelect = el.style.webkitUserSelect = 'none';
-            el.style.webkitTouchCallout = 'none';
-            el.style.touchAction = 'none';
-        }
-
-        // simulate mouse down on touch start
-        ontouchstart = e=> { e.preventDefault(); onmouseup(); };
-        ontouchend = e=> { e.preventDefault(); onmousedown(); };
-        ontouchmove = e=>
-        {
-            e.preventDefault();
-            // simulate mouse move on touch move
-            for (const touch of e.touches)
-                onmousemove({ clientX: touch.clientX, clientY: touch.clientY });
-        }
-    }
-    
+ 
     updateAnimation();
 }
 </script>
