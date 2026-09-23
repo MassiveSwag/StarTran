@@ -7,189 +7,774 @@
 <script>
 'use strict';
 
+// ============================================================
+// CANVAS SETUP
+// ============================================================
+
 const a = document.createElement('canvas');
-const c = a.getContext("2d");
+const c = a.getContext('2d');
 
 document.body.appendChild(a);
+
 document.body.style.margin = '0';
 document.body.style.overflow = 'hidden';
+document.body.style.background = '#000';
 
 a.width = window.innerWidth;
 a.height = window.innerHeight;
+
+a.style.display = 'block';
+a.style.touchAction = 'none';
+
+
+// ============================================================
+// GAME SETTINGS
+// ============================================================
 
 const ENHANCED = 1;
 const test = 0;
 const cameraInFront = 3;
 const F = .7;
 
-let i, j, r, p, s, px, py;
-let ax, ay, bx, by, ex, ey, fx, fy;
-let mouseJustPressed = 0;
-let mouseMode = 1;
-let keyInput = {};
 
-// game variables
+// ============================================================
+// GAME VARIABLES
+// ============================================================
+
+let i, j, r;
+let p;
+let px, py, s;
+
+let ax, ay;
+let bx, by;
+let ex, ey;
+let fx, fy;
+
 let x = 0;
 let y = 0;
 let z = 0;
+
 let vy = 0;
 
-let trackGap = 0;
+let mouseX = a.width / 2;
 let mouseDown = 0;
+let mouseJustPressed = 0;
+
+let mouseMode = 1;
+
+let keyInput = {};
+
+let trackGap = 0;
 let trackSx = 3;
 let trackSw = 3;
-let mouseX = a.width / 2;
+
 let trackRows = [];
 
-// set draw color
-let hsl = (h, s, l, alpha = 1) =>
+
+// ============================================================
+// PHONE TILT
+// ============================================================
+
+let tiltEnabled = false;
+let tiltX = 0;
+
+
+// ============================================================
+// DRAWING HELPERS
+// ============================================================
+
+function hsl(h, s, l, alpha = 1)
 {
-    c.fillStyle = `hsl(${h},${s}%,${l}%,${alpha})`;
-};
+    c.fillStyle =
+        `hsl(${h},${s}%,${l}%,${alpha})`;
+}
 
-// project point to screen
-let P = (px, py, dz) =>
-[
-    a.width / 2 +
-    (px - x + (dz - cameraInFront) ** 2 / 50 *
-    Math.cos((z + dz) / 49)) *
-    a.height * F / dz,
 
-    a.height / 2 -
-    (py - 2 + dz * dz / 50) *
-    a.height * F / dz,
+// ============================================================
+// PROJECT 3D POINT TO SCREEN
+// ============================================================
 
-    a.height * F / dz
-];
-
-// main game loop
-let update = () =>
+function P(px, py, dz)
 {
-    // background
+    return [
+
+        a.width / 2 +
+        (
+            px -
+            x +
+            (dz - cameraInFront) ** 2 / 50 *
+            Math.cos((z + dz) / 49)
+        ) *
+        a.height *
+        F /
+        dz,
+
+        a.height / 2 -
+        (
+            py -
+            2 +
+            dz * dz / 50
+        ) *
+        a.height *
+        F /
+        dz,
+
+        a.height *
+        F /
+        dz
+    ];
+}
+
+
+// ============================================================
+// RESET GAME
+// ============================================================
+
+function resetGame()
+{
+    x = 0;
+    y = 0;
+    z = 0;
+
+    vy = 0;
+
+    trackGap = 0;
+
+    trackSx = 3;
+    trackSw = 3;
+
+    trackRows = [];
+
+    mouseJustPressed = 0;
+}
+
+
+// ============================================================
+// PHONE MOTION PERMISSION
+// ============================================================
+
+function enableTilt()
+{
+    if (
+        typeof DeviceOrientationEvent !==
+        'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission ===
+        'function'
+    )
+    {
+        DeviceOrientationEvent
+            .requestPermission()
+            .then(permission =>
+            {
+                if (permission === 'granted')
+                {
+                    startTilt();
+                }
+            })
+            .catch(error =>
+            {
+                console.log(
+                    'Motion permission denied:',
+                    error
+                );
+            });
+    }
+    else
+    {
+        startTilt();
+    }
+}
+
+
+// ============================================================
+// START TILT
+// ============================================================
+
+function startTilt()
+{
+    if (tiltEnabled)
+        return;
+
+    tiltEnabled = true;
+
+    window.addEventListener(
+        'deviceorientation',
+        handleOrientation,
+        true
+    );
+
+    console.log('Phone tilt enabled');
+}
+
+
+// ============================================================
+// HANDLE PHONE ORIENTATION
+// ============================================================
+
+function handleOrientation(event)
+{
+    if (event.gamma === null)
+        return;
+
+    /*
+        gamma represents left/right phone tilt.
+
+        Negative = left
+        Positive = right
+    */
+
+    tiltX = event.gamma;
+
+    // Small dead zone so the ball doesn't drift
+    // when the phone is nearly level.
+
+    if (Math.abs(tiltX) < 3)
+    {
+        tiltX = 0;
+    }
+}
+
+
+// ============================================================
+// KEYBOARD INPUT
+// ============================================================
+
+window.addEventListener(
+    'keydown',
+    function(e)
+    {
+        if (
+            e.key === ' ' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'ArrowDown' ||
+            e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight'
+        )
+        {
+            e.preventDefault();
+        }
+
+        keyInput[e.key] = true;
+
+        mouseMode = 0;
+
+        // Jump
+        if (
+            e.key === ' ' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'w' ||
+            e.key === 'W'
+        )
+        {
+            mouseDown = .1;
+            mouseJustPressed = 1;
+        }
+
+        // Restart
+        if (
+            e.key === 'r' ||
+            e.key === 'R'
+        )
+        {
+            resetGame();
+        }
+    }
+);
+
+
+window.addEventListener(
+    'keyup',
+    function(e)
+    {
+        keyInput[e.key] = false;
+
+        if (
+            e.key === ' ' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'w' ||
+            e.key === 'W'
+        )
+        {
+            mouseDown = 0;
+        }
+    }
+);
+
+
+// ============================================================
+// MOUSE INPUT
+// ============================================================
+
+window.addEventListener(
+    'mousemove',
+    function(e)
+    {
+        mouseX = e.clientX;
+
+        mouseMode = 1;
+    }
+);
+
+
+window.addEventListener(
+    'mousedown',
+    function(e)
+    {
+        mouseDown = .1;
+
+        mouseJustPressed = 1;
+
+        mouseMode = 1;
+
+        // Also attempt to enable phone motion
+        enableTilt();
+    }
+);
+
+
+window.addEventListener(
+    'mouseup',
+    function(e)
+    {
+        mouseDown = 0;
+    }
+);
+
+
+// ============================================================
+// TOUCH INPUT
+// ============================================================
+
+if ('ontouchstart' in window)
+{
+    document.documentElement.style.userSelect = 'none';
+
+    document.documentElement.style.webkitUserSelect =
+        'none';
+
+    document.body.style.userSelect = 'none';
+
+    document.body.style.webkitUserSelect =
+        'none';
+
+
+    // --------------------------------------------------------
+    // TOUCH START
+    // --------------------------------------------------------
+
+    a.addEventListener(
+        'touchstart',
+        function(e)
+        {
+            e.preventDefault();
+
+            const touch =
+                e.touches[0];
+
+            mouseX =
+                touch.clientX;
+
+            mouseDown = .1;
+
+            mouseJustPressed = 1;
+
+            mouseMode = 1;
+
+            // Request iPhone motion permission
+            enableTilt();
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // TOUCH MOVE
+    // --------------------------------------------------------
+
+    a.addEventListener(
+        'touchmove',
+        function(e)
+        {
+            e.preventDefault();
+
+            const touch =
+                e.touches[0];
+
+            mouseX =
+                touch.clientX;
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // TOUCH END
+    // --------------------------------------------------------
+
+    a.addEventListener(
+        'touchend',
+        function(e)
+        {
+            e.preventDefault();
+
+            mouseDown = 0;
+
+        },
+        {
+            passive: false
+        }
+    );
+}
+
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+window.addEventListener(
+    'resize',
+    function()
+    {
+        a.width =
+            window.innerWidth;
+
+        a.height =
+            window.innerHeight;
+
+        mouseX =
+            a.width / 2;
+    }
+);
+
+
+// ============================================================
+// MAIN GAME UPDATE
+// ============================================================
+
+function update()
+{
+    // --------------------------------------------------------
+    // SKY
+    // --------------------------------------------------------
+
     for (i = 500; i--;)
     {
-        // sky
-        hsl(170 + i / 9 + z, 70, 70 - i / 9);
-        c.fillRect(
-            0,
-            a.height * i / 500,
-            a.width,
-            a.height / 250
+        hsl(
+            170 +
+            i / 9 +
+            z,
+
+            70,
+
+            70 -
+            i / 9
         );
 
-        // stars
-        hsl(0, 0, 99);
+        c.fillRect(
+            0,
+
+            a.height *
+            i /
+            500,
+
+            a.width,
+
+            a.height /
+            250
+        );
+
+
+        // Stars
+
+        hsl(
+            0,
+            0,
+            99
+        );
 
         c.fillRect(
-            (i * i + z * i / 99) % a.width,
-            i ** 3.3 % a.height,
-            i % 4 * a.height / 500,
-            i % 4 * a.height / 500
+            (
+                i * i +
+                z * i / 99
+            ) %
+            a.width,
+
+            i ** 3.3 %
+            a.height,
+
+            i % 4 *
+            a.height /
+            500,
+
+            i % 4 *
+            a.height /
+            500
         );
     }
 
-    // track
-    for (r = z + 40 | 0; r > z; r--)
+
+    // --------------------------------------------------------
+    // CREATE TRACK
+    // --------------------------------------------------------
+
+    for (
+        r = z + 40 | 0;
+        r > z;
+        r--
+    )
     {
-        // create new track rows
-        for (i = trackRows.length; i <= r;)
+        for (
+            i = trackRows.length;
+            i <= r;
+        )
         {
-            // random gap
             if (
                 trackGap < -8 &&
-                Math.random() < Math.min(.2, i / 1e4)
+                Math.random() <
+                Math.min(
+                    .2,
+                    i / 1e4
+                )
             )
             {
-                trackGap = 2 + Math.min(4, i / 400);
-            }
-
-            // random width
-            if (Math.random() < .1)
-            {
-                trackSw = 2 + Math.random() * 3 | 0;
-
-                trackSx = Math.max(
-                    0,
+                trackGap =
+                    2 +
                     Math.min(
-                        7 - trackSw,
-                        trackSx - 2 + Math.random() * 5 | 0
-                    )
-                );
+                        4,
+                        i / 400
+                    );
             }
+
+
+            if (
+                Math.random() < .1
+            )
+            {
+                trackSw =
+                    2 +
+                    Math.random() *
+                    3 |
+                    0;
+
+                trackSx =
+                    Math.max(
+                        0,
+
+                        Math.min(
+                            7 -
+                            trackSw,
+
+                            trackSx -
+                            2 +
+                            Math.random() *
+                            5 |
+                            0
+                        )
+                    );
+            }
+
 
             trackGap--;
 
-            trackRows[i++] = p = [];
 
-            for (j = 7; j--;)
+            trackRows[i++] =
+                p = [];
+
+
+            for (
+                j = 7;
+                j--;
+            )
             {
                 p[j] =
                     i < 35 |
                     Math.random() > .9 |
                     trackGap < 0 &
                     trackSx <= j &
-                    j < trackSx + trackSw &
-                    Math.random() > Math.min(.2, z / 1e4);
+                    j <
+                    trackSx +
+                    trackSw &
+                    Math.random() >
+                    Math.min(
+                        .2,
+                        z / 1e4
+                    );
             }
         }
 
-        // draw track
-        for (j = 2; j--;)
+
+        // ----------------------------------------------------
+        // DRAW TRACK
+        // ----------------------------------------------------
+
+        for (
+            j = 2;
+            j--;
+        )
         {
-            for (i = 7; i--;)
+            for (
+                i = 7;
+                i--;
+            )
             {
-                if (trackRows[r][i])
+                if (
+                    trackRows[r][i]
+                )
                 {
-                    [ax, ay] = P(i - 3.5, 0, r - z);
-                    [bx, by] = P(i - 2.5, 0, r - z);
-                    [ex, ey] = P(i - 3.5, 0, r - z + 1);
-                    [fx, fy] = P(i - 2.5, 0, r - z + 1);
+                    [
+                        ax,
+                        ay
+                    ] =
+                        P(
+                            i - 3.5,
+                            0,
+                            r - z
+                        );
+
+
+                    [
+                        bx,
+                        by
+                    ] =
+                        P(
+                            i - 2.5,
+                            0,
+                            r - z
+                        );
+
+
+                    [
+                        ex,
+                        ey
+                    ] =
+                        P(
+                            i - 3.5,
+                            0,
+                            r - z + 1
+                        );
+
+
+                    [
+                        fx,
+                        fy
+                    ] =
+                        P(
+                            i - 2.5,
+                            0,
+                            r - z + 1
+                        );
+
 
                     if (j)
                     {
-                        // back and sides
+                        // Sides
+
                         hsl(
-                            99 + (r >> 7) * 70,
+                            99 +
+                            (r >> 7) *
+                            70,
+
                             60,
-                            30 + (r + i & 1) * 9
+
+                            30 +
+                            (r + i & 1) *
+                            9
                         );
+
 
                         c.fillRect(
                             ex,
                             ey,
+
                             fx - ex,
-                            (40 - r + z) / 30 * a.height
+
+                            (
+                                40 -
+                                r +
+                                z
+                            ) /
+                            30 *
+                            a.height
                         );
                     }
                     else
                     {
-                        // front
+                        // Front
+
                         hsl(
-                            99 + (r >> 7) * 70,
+                            99 +
+                            (r >> 7) *
+                            70,
+
                             60,
-                            9 + (r + i & 1) * 5
+
+                            9 +
+                            (r + i & 1) *
+                            5
                         );
+
 
                         c.fillRect(
                             ax,
                             ay,
+
                             bx - ax,
-                            (40 - r + z) / 30 * a.height
+
+                            (
+                                40 -
+                                r +
+                                z
+                            ) /
+                            30 *
+                            a.height
                         );
 
-                        // top
+
+                        // Top
+
                         hsl(
-                            99 + (r >> 7) * 70,
+                            99 +
+                            (r >> 7) *
+                            70,
+
                             60,
-                            60 + (r + i & 1) * 30
+
+                            60 +
+                            (r + i & 1) *
+                            30
                         );
+
 
                         c.beginPath();
-                        c.moveTo(ax, ay);
-                        c.lineTo(bx, by);
-                        c.lineTo(fx, fy);
-                        c.lineTo(ex, ey);
+
+                        c.moveTo(
+                            ax,
+                            ay
+                        );
+
+                        c.lineTo(
+                            bx,
+                            by
+                        );
+
+                        c.lineTo(
+                            fx,
+                            fy
+                        );
+
+                        c.lineTo(
+                            ex,
+                            ey
+                        );
+
                         c.closePath();
+
                         c.fill();
                     }
                 }
@@ -197,49 +782,58 @@ let update = () =>
         }
     }
 
-    // player shadow
+
+    // --------------------------------------------------------
+    // PLAYER SHADOW
+    // --------------------------------------------------------
+
     if (
         y >= 0 &&
-        trackRows[z + cameraInFront | 0] &&
-        trackRows[z + cameraInFront | 0][Math.round(x + 3)]
+        trackRows[
+            z +
+            cameraInFront |
+            0
+        ] &&
+        trackRows[
+            z +
+            cameraInFront |
+            0
+        ][
+            Math.round(
+                x + 3
+            )
+        ]
     )
     {
-        hsl(0, 0, 0, .5);
+        hsl(
+            0,
+            0,
+            0,
+            .5
+        );
 
-        [px, py, s] = P(x, 0, cameraInFront);
 
-        c.beginPath();
-        c.ellipse(
+        [
             px,
             py,
-            s / 4,
-            s / 9,
-            0,
-            0,
-            Math.PI * 2
-        );
-        c.fill();
-    }
-
-    // player
-    for (i = 99; i--;)
-    {
-        hsl(z / 9 - i / 3, 90, 99 - i * .7);
-
-        [px, py, s] =
+            s
+        ] =
             P(
-                x + .1 - i / 1e3,
-                y + .35 - i / 1e3,
+                x,
+                0,
                 cameraInFront
             );
 
+
         c.beginPath();
 
         c.ellipse(
             px,
             py,
-            i * s / 300,
-            i * s / 300,
+
+            s / 4,
+            s / 9,
+
             0,
             0,
             Math.PI * 2
@@ -248,297 +842,289 @@ let update = () =>
         c.fill();
     }
 
-    // update player
+
+    // --------------------------------------------------------
+    // PLAYER
+    // --------------------------------------------------------
+
+    for (
+        i = 99;
+        i--;
+    )
+    {
+        hsl(
+            z / 9 -
+            i / 3,
+
+            90,
+
+            99 -
+            i * .7
+        );
+
+
+        [
+            px,
+            py,
+            s
+        ] =
+            P(
+                x +
+                .1 -
+                i / 1e3,
+
+                y +
+                .35 -
+                i / 1e3,
+
+                cameraInFront
+            );
+
+
+        c.beginPath();
+
+        c.ellipse(
+            px,
+            py,
+
+            i *
+            s /
+            300,
+
+            i *
+            s /
+            300,
+
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        c.fill();
+    }
+
+
+    // --------------------------------------------------------
+    // PLAYER MOVEMENT
+    // --------------------------------------------------------
+
     if (y > -4)
     {
-        // movement
-        if (ENHANCED)
+        // PHONE TILT
+        if (tiltEnabled)
         {
-            if (mouseMode)
-            {
-                x += mouseX / a.width / 2 - .25;
-            }
-            else
-            {
-                if (
-                    keyInput['d'] ||
-                    keyInput['D'] ||
-                    keyInput['ArrowRight']
-                )
-                {
-                    x += .1;
-                }
+            let tiltAmount =
+                tiltX /
+                30;
 
-                if (
-                    keyInput['a'] ||
-                    keyInput['A'] ||
-                    keyInput['ArrowLeft']
-                )
-                {
-                    x -= .1;
-                }
-            }
+
+            tiltAmount =
+                Math.max(
+                    -1,
+                    Math.min(
+                        1,
+                        tiltAmount
+                    )
+                );
+
+
+            // Steering sensitivity
+            x +=
+                tiltAmount *
+                .12;
         }
+
+        // MOUSE
+        else if (mouseMode)
+        {
+            x +=
+                mouseX /
+                a.width /
+                2 -
+                .25;
+        }
+
+        // KEYBOARD
         else
         {
-            x += mouseX / a.width / 2 - .25;
+            if (
+                keyInput['d'] ||
+                keyInput['D'] ||
+                keyInput['ArrowRight']
+            )
+            {
+                x += .1;
+            }
+
+
+            if (
+                keyInput['a'] ||
+                keyInput['A'] ||
+                keyInput['ArrowLeft']
+            )
+            {
+                x -= .1;
+            }
         }
 
-        // gravity
-        y += vy -= .006;
 
-        // forward speed
-        z += Math.min(.5, .2 + z / 5e3);
+        // ----------------------------------------------------
+        // GRAVITY
+        // ----------------------------------------------------
+
+        y +=
+            vy -=
+            .006;
+
+
+        // ----------------------------------------------------
+        // FORWARD SPEED
+        // ----------------------------------------------------
+
+        z +=
+            Math.min(
+                .5,
+                .2 +
+                z / 5e3
+            );
+
 
         if (test)
+        {
             z += .5;
+        }
 
-        // landing / jumping
+
+        // ----------------------------------------------------
+        // LANDING / JUMPING
+        // ----------------------------------------------------
+
         if (
             y < 0 &&
             y > -.3 &&
-            trackRows[z + cameraInFront | 0] &&
-            trackRows[z + cameraInFront | 0][Math.round(x + 3)]
+            trackRows[
+                z +
+                cameraInFront |
+                0
+            ] &&
+            trackRows[
+                z +
+                cameraInFront |
+                0
+            ][
+                Math.round(
+                    x + 3
+                )
+            ]
         )
         {
-            y = vy = mouseDown;
+            y =
+                vy =
+                mouseDown;
+
 
             if (
                 ENHANCED &&
-                window.ontouchstart !== undefined
+                window.ontouchstart !==
+                undefined
             )
             {
                 mouseDown = 0;
             }
         }
-
-        if (test && y < 0 && vy < 0)
-        {
-            y = vy = 0;
-        }
     }
+
+    // --------------------------------------------------------
+    // GAME OVER / RESTART
+    // --------------------------------------------------------
+
     else if (ENHANCED)
     {
-        // game over / restart
         if (mouseJustPressed)
         {
-            x = 0;
-            y = 0;
-            z = 0;
-            vy = 0;
-            trackGap = 0;
-
-            trackSx = 3;
-            trackSw = 3;
-
-            trackRows = [];
+            resetGame();
         }
     }
+
 
     mouseJustPressed = 0;
-};
-
-// ----------------------------------------------------
-// INPUT
-// ----------------------------------------------------
-
-// Mouse movement
-window.addEventListener('mousemove', e =>
-{
-    mouseX = e.clientX;
-});
-
-// Mouse button
-window.addEventListener('mousedown', e =>
-{
-    mouseDown = .1;
-    mouseJustPressed = 1;
-    mouseMode = 1;
-});
-
-// Mouse release
-window.addEventListener('mouseup', e =>
-{
-    mouseDown = 0;
-});
-
-// Keyboard
-window.addEventListener('keydown', e =>
-{
-    // prevent browser scrolling with arrows/space
-    if (
-        e.key === ' ' ||
-        e.key === 'ArrowUp' ||
-        e.key === 'ArrowDown' ||
-        e.key === 'ArrowLeft' ||
-        e.key === 'ArrowRight'
-    )
-    {
-        e.preventDefault();
-    }
-
-    mouseMode = 0;
-
-    keyInput[e.key] = 1;
-
-    // restart
-    if (e.key === 'r' || e.key === 'R')
-    {
-        x = 0;
-        y = 0;
-        z = 0;
-        vy = 0;
-        trackGap = 0;
-
-        trackSx = 3;
-        trackSw = 3;
-
-        trackRows = [];
-    }
-
-    // jump
-    if (
-        e.key === ' ' ||
-        e.key === 'ArrowUp' ||
-        e.key === 'w' ||
-        e.key === 'W'
-    )
-    {
-        mouseDown = .1;
-        mouseJustPressed = 1;
-    }
-});
-
-window.addEventListener('keyup', e =>
-{
-    keyInput[e.key] = 0;
-
-    if (
-        e.key === ' ' ||
-        e.key === 'ArrowUp' ||
-        e.key === 'w' ||
-        e.key === 'W'
-    )
-    {
-        mouseDown = 0;
-    }
-});
-
-// ----------------------------------------------------
-// TOUCH
-// ----------------------------------------------------
-
-if ('ontouchstart' in window)
-{
-    document.documentElement.style.userSelect = 'none';
-    document.documentElement.style.webkitUserSelect = 'none';
-
-    document.body.style.userSelect = 'none';
-    document.body.style.webkitUserSelect = 'none';
-
-    a.style.userSelect = 'none';
-    a.style.webkitUserSelect = 'none';
-
-    a.style.touchAction = 'none';
-    document.body.style.touchAction = 'none';
-
-    // TOUCH START = jump
-    a.addEventListener('touchstart', e =>
-    {
-        e.preventDefault();
-
-        const touch = e.touches[0];
-
-        mouseX = touch.clientX;
-
-        mouseDown = .1;
-        mouseJustPressed = 1;
-        mouseMode = 1;
-    }, { passive: false });
-
-    // TOUCH MOVE = move left/right
-    a.addEventListener('touchmove', e =>
-    {
-        e.preventDefault();
-
-        const touch = e.touches[0];
-
-        mouseX = touch.clientX;
-    }, { passive: false });
-
-    // TOUCH END
-    a.addEventListener('touchend', e =>
-    {
-        e.preventDefault();
-
-        mouseDown = 0;
-    }, { passive: false });
 }
 
-// ----------------------------------------------------
-// RESIZE
-// ----------------------------------------------------
 
-window.addEventListener('resize', () =>
-{
-    a.width = window.innerWidth;
-    a.height = window.innerHeight;
-
-    mouseX = a.width / 2;
-});
-
-// ----------------------------------------------------
+// ============================================================
 // GAME LOOP
-// ----------------------------------------------------
+// ============================================================
 
-if (!ENHANCED)
-{
-    setInterval(update, 16);
-}
-else
-{
-    let frameTimeLastMS = 0;
-    let frameTimeBufferMS = 0;
+let frameTimeLastMS = 0;
+let frameTimeBufferMS = 0;
 
-    const updateAnimation = (frameTimeMS = 0) =>
+
+function updateAnimation(
+    frameTimeMS = 0
+)
+{
+    requestAnimationFrame(
+        updateAnimation
+    );
+
+
+    let frameTimeDeltaMS =
+        frameTimeMS -
+        frameTimeLastMS;
+
+
+    frameTimeLastMS =
+        frameTimeMS;
+
+
+    frameTimeBufferMS +=
+        frameTimeDeltaMS;
+
+
+    frameTimeBufferMS =
+        Math.min(
+            frameTimeBufferMS,
+            50
+        );
+
+
+    let deltaSmooth = 0;
+
+
+    if (
+        frameTimeBufferMS < 0 &&
+        frameTimeBufferMS > -9
+    )
     {
-        requestAnimationFrame(updateAnimation);
+        deltaSmooth =
+            frameTimeBufferMS;
 
-        let frameTimeDeltaMS =
-            frameTimeMS - frameTimeLastMS;
+        frameTimeBufferMS = 0;
+    }
 
-        frameTimeLastMS = frameTimeMS;
 
-        frameTimeBufferMS += frameTimeDeltaMS;
+    for (
+        ;
+        frameTimeBufferMS >= 0;
+        frameTimeBufferMS -=
+            1000 / 60
+    )
+    {
+        update();
+    }
 
-        frameTimeBufferMS =
-            Math.min(frameTimeBufferMS, 50);
 
-        let deltaSmooth = 0;
-
-        if (
-            frameTimeBufferMS < 0 &&
-            frameTimeBufferMS > -9
-        )
-        {
-            deltaSmooth = frameTimeBufferMS;
-            frameTimeBufferMS = 0;
-        }
-
-        for (
-            ;
-            frameTimeBufferMS >= 0;
-            frameTimeBufferMS -= 1000 / 60
-        )
-        {
-            update();
-        }
-
-        frameTimeBufferMS += deltaSmooth;
-    };
-
-    updateAnimation();
+    frameTimeBufferMS +=
+        deltaSmooth;
 }
+
+
+// ============================================================
+// START GAME
+// ============================================================
+
+updateAnimation();
+
 </script>
 </body>
 </html>
